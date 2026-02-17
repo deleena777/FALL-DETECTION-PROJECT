@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IoT Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 30px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            width: 260px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .emoji {
+            font-size: 40px;
+        }
+        .title {
+            font-size: 20px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-top: 20px;
+        }
+        .switch input { display:none; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .value {
+            font-size: 26px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>🚀 IoT Web Dashboard</h2>
+
+<div class="container">
+
+    <!-- CARD 1 : Toggle D7 -->
+    <div class="card">
+        <div class="emoji">🔘</div>
+        <div class="title">D7 Control</div>
+
+        <label class="switch">
+            <input type="checkbox" id="toggleD7" onchange="toggleD7()">
+            <span class="slider"></span>
+        </label>
+
+        <p id="statusText">Current: OFF</p>
+    </div>
+
+    <!-- CARD 2 : Angular Velocity -->
+    <div class="card">
+        <div class="emoji">🌀</div>
+        <div class="title">Angular Velocity</div>
+
+        <div class="value" id="angVal">--</div>
+    </div>
+
+</div>
+
+<script>
+// ------------------ TOGGLE D7 WRITE API ------------------
+function toggleD7() {
+    let state = document.getElementById("toggleD7").checked ? 1 : 0;
+    let url = `https://iot.roboninja.in/index.php?action=write&UID=DS07&D7=${state}`;
+
+    fetch(url)
+        .then(r => r.text())
+        .then(() => {
+            document.getElementById("statusText").innerText =
+                "Current: " + (state ? "ON" : "OFF");
+        });
+}
+
+// ------------------ READ ANGULAR VELOCITY ------------------
+function readAngular() {
+    fetch("https://iot.roboninja.in/index.php?action=read&UID=DS07&Angular_Velocity")
+        .then(r => r.text())
+        .then(value => {
+            document.getElementById("angVal").innerText = value;
+        })
+        .catch(() => {
+            document.getElementById("angVal").innerText = "ERR";
+        });
+}
+
+// Auto-update every 1 sec
+setInterval(readAngular, 1000);
+</script>
+
+</body>
+</html>
